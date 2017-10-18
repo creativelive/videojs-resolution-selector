@@ -1,3 +1,4 @@
+'use strict';
 /**
  * Video.js Resolution Selector
  *
@@ -205,8 +206,7 @@
     /*******************************************************************
      * Setup variables, parse settings
      *******************************************************************/
-    var player = this,
-      resolutionSelector;
+    var resolutionSelector;
 
     function getResolutionFromSources(player, availableRes) {
       var sources = player.options().sources,
@@ -289,19 +289,19 @@
      *******************************************************************/
 
     // Make sure we have player.localize() if it's not defined by Video.js
-    if (typeof player.localize !== 'function') {
-      player.localize = function(string) {
+    if (typeof this.localize !== 'function') {
+      this.localize = function(string) {
         return string;
       };
     }
 
     // Helper function to get the current resolution
-    player.getCurrentRes = function() {
-      if (typeof player.currentRes !== 'undefined') {
-        return player.currentRes;
+    this.getCurrentRes = function() {
+      if (typeof this.currentRes !== 'undefined') {
+        return this.currentRes;
       } else {
         try {
-          return res = player.options().sources[0]['data-res'];
+          return res = this.options().sources[0]['data-res'];
         } catch (e) {
           return '';
         }
@@ -309,18 +309,18 @@
     };
 
     // Define the change res method
-    player.changeRes = function(targetResolution) {
+    this.changeRes = function(targetResolution) {
 
-      var videoElement = player.el().firstChild,
-        isPaused = player.paused(),
-        currentTime = player.currentTime(),
+      var videoElement = this.el().firstChild,
+        isPaused = this.paused(),
+        currentTime = this.currentTime(),
         buttonNodes,
         buttonNodeCount;
 
       // Do nothing if we aren't changing resolutions or if the resolution isn't defined
-      if (player.getCurrentRes() === targetResolution ||
-        !player.availableRes ||
-        !player.availableRes[targetResolution]) {
+      if (this.getCurrentRes() === targetResolution ||
+        !this.availableRes ||
+        !this.availableRes[targetResolution]) {
         return;
       }
 
@@ -330,25 +330,25 @@
       }
 
       // Change the source and make sure we don't start the video over
-      player.src(player.availableRes[targetResolution]).one('loadedmetadata', function() {
+      this.src(this.availableRes[targetResolution]).one('loadedmetadata', function() {
 
-        player.currentTime(currentTime);
+        this.currentTime(currentTime);
 
         // If the video was paused, don't show the poster image again
-        player.addClass('vjs-has-started');
+        this.addClass('vjs-has-started');
 
         if (!isPaused) {
-          player.play();
+          this.play();
         }
       });
 
-      // Save the newly selected resolution in our player options property
-      player.currentRes = targetResolution;
+      // Save the newly selected resolution in our this options property
+      this.currentRes = targetResolution;
 
       // Make sure the button has been added to the control bar
-      if (player.controlBar.resolutionSelector) {
+      if (this.controlBar.resolutionSelector) {
 
-        buttonNodes = player.controlBar.resolutionSelector.el().firstChild.children;
+        buttonNodes = this.controlBar.resolutionSelector.el().firstChild.children;
         buttonNodeCount = buttonNodes.length;
 
         // Update the button text
@@ -365,11 +365,11 @@
       }
 
       // Update the classes to reflect the currently selected resolution
-      player.trigger('changeRes');
+      this.trigger('changeRes');
     };
 
     // Define the change res method
-    player.setResOptions = function(options) {
+    this.setResOptions = function(options) {
       // Override default options with those provided
       var settings = VideoJS.util.mergeOptions({
         default_res: '', // (string)	The resolution that should be selected by default ( '480' or  '480,1080,240' )
@@ -419,7 +419,7 @@
       this.controlBar.resolutionSelector = this.controlBar.addChild(resolutionSelector);
     };
 
-    player.setResOptions(options);
+    this.setResOptions(options);
 
   });
 
