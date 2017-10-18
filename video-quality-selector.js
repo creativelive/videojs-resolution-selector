@@ -417,6 +417,24 @@
 			// Update the classes to reflect the currently selected resolution
 			player.trigger( 'changeRes' );
 		};
+
+    // Define the change res method
+    player.setResOptions = function( options ) {
+      current_res = player.getCurrentRes();
+      if ( current_res ) { current_res = methods.res_label( current_res ); }
+      this.controlBar.removeChild( resolutionSelector );
+      
+      // Add the resolution selector button
+      resolutionSelector = new _V_.ResolutionSelector( this, {
+        buttonText		    : player.localize( current_res || 'Quality' ),
+        available_res	    : options.available_res,
+        hide_menu_title   : options.hide_menu_title,
+        res_control_player: options.control_player
+      });
+
+      // Add the button to the control bar object and the DOM
+      this.controlBar.resolutionSelector = this.controlBar.addChild( resolutionSelector );
+    }
 		
 		/*******************************************************************
 		 * Add the resolution selector button
