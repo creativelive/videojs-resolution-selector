@@ -1,0 +1,13 @@
+{
+  "anatomy" : {
+    "styles": {},
+    "templates": {},
+    "lang": {"sub" : true},
+    "assets" : {"sub" : true}
+  },
+  "lint": [
+    "video-quality-selector.js",
+    "gulpfile.js",
+    "gulp/**/*.js"
+  ]
+}

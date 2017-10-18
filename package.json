@@ -8,7 +8,7 @@
   "style": "video-quality-selector.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dominic-p/videojs-resolution-selector.git"
+    "url": "git+https://github.com/dominic-p/videojs-resolution-selector.git"
   },
   "dependencies": {},
   "bugs": {
@@ -18,5 +18,16 @@
     "videojs",
     "resolution",
     "selector"
-  ]
+  ],
+  "homepage": "https://github.com/dominic-p/videojs-resolution-selector#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-diff": "^1.0.0",
+    "gulp-eslint": "^4.0.0",
+    "gulp-jsbeautifier": "^2.1.1",
+    "minimist": "^1.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
 }
