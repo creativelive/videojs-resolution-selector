@@ -111,15 +111,21 @@
 		
 		/** @constructor */
 		init : function( player, options ) {
-			
+
+		  console.log('new ResolutionSelector', options);
 			// Add our list of available resolutions to the player object
-			player.availableRes = options.available_res;
+      player.availableRes = options.available_res;
+      player.hideMenuTitle = options.hide_menu_title;
+      player.resControlPlayer = options.res_control_player;
+
 			
 			// Call the parent constructor
 			_V_.MenuButton.call( this, player, options );
 			
 			// Set the button text based on the option provided
 			this.el().firstChild.firstChild.innerHTML = options.buttonText;
+
+      this.on('click', this.switch );
 		}
 	});
 	
@@ -132,16 +138,18 @@
 		var player = this.player(),
 			items = [],
 			current_res;
-		
-		// Add the menu title item
-		items.push( new _V_.ResolutionTitleMenuItem( player, {
-			
-			el : _V_.Component.prototype.createEl( 'li', {
-				
-				className	: 'vjs-menu-title vjs-res-menu-title',
-				innerHTML	: player.localize( 'Quality' )
-			})
-		}));
+
+		if (!player.hideMenuTitle) {
+      // Add the menu title item
+      items.push( new _V_.ResolutionTitleMenuItem( player, {
+
+        el : _V_.Component.prototype.createEl( 'li', {
+
+          className	: 'vjs-menu-title vjs-res-menu-title',
+          innerHTML	: player.localize( 'Quality' )
+        })
+      }));
+    }
 		
 		// Add an item for each available resolution
 		for ( current_res in player.availableRes ) {
@@ -166,15 +174,51 @@
 				return parseInt( b.resolution ) - parseInt( a.resolution );
 			}
 		});
-		
+
 		return items;
 	};
+
+	_V_.ResolutionSelector.prototype.onClick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  _V_.ResolutionSelector.prototype.switch = function(e) {
+    // select the next resolution
+
+    var player = this.player(),
+    currentIndex = 0,
+    i = 0,
+    orderRes = [];
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    for (var key in player.availableRes) {
+      if (key !== 'length' ) {
+        orderRes.push(key);
+
+        if ( key === player.currentRes) {
+          currentIndex = i;
+        }
+        i++;
+      }
+    }
+
+    if (currentIndex >= orderRes.length-1) {
+      currentIndex = 0;
+    } else {
+      currentIndex ++;
+    }
+
+    this.player().changeRes( orderRes[currentIndex] );
+  };
 	
 	/***********************************************************************************
 	 * Register the plugin with videojs, main plugin function
 	 ***********************************************************************************/
 	_V_.plugin( 'resolutionSelector', function( options ) {
-		
+
 		// Only enable the plugin on HTML5 videos
 		if ( ! this.el().firstChild.canPlayType  ) { return; }	
 		
@@ -191,17 +235,18 @@
 			settings = _V_.util.mergeOptions({
 				
 				default_res	: '',		// (string)	The resolution that should be selected by default ( '480' or  '480,1080,240' )
-				force_types	: false		// (array)	List of media types. If passed, we need to have source for each type in each resolution or that resolution will not be an option
-				
+				force_types	: false,		// (array)	List of media types. If passed, we need to have source for each type in each resolution or that resolution will not be an option
+        hide_menu_title: false,
+        control_player: true,
+        available_res: { length : 0 }, // (array)
 			}, options || {} ),
-			
-			available_res = { length : 0 },
+
+      available_res = settings.available_res,
 			current_res,
 			resolutionSelector,
 			
 			// Split default resolutions if set and valid, otherwise default to an empty array
 			default_resolutions = ( settings.default_res && typeof settings.default_res == 'string' ) ? settings.default_res.split( ',' ) : [];
-		
 		// Get all of the available resoloutions
 		while ( i > 0 ) {
 			
@@ -264,15 +309,18 @@
 		}
 		
 		// Make sure we have at least 2 available resolutions before we add the button
-		if ( available_res.length < 2 ) { return; }
+		if ( available_res.length < 2 ) {
+		  return;
+		}
 		
 		// Loop through the choosen default resolutions if there were any
 		for ( i = 0; i < default_resolutions.length; i++ ) {
 			
 			// Set the video to start out with the first available default res
-			if ( available_res[default_resolutions[i]] ) {
-				
-				player.src( available_res[default_resolutions[i]] );
+			if ( available_res[default_resolutions[i]]) {
+			  if (settings.control_player) {
+          player.src( available_res[default_resolutions[i]] );
+        }
 				player.currentRes = default_resolutions[i];
 				break;
 			}
@@ -327,17 +375,22 @@
 			
 			// Make sure the loadedmetadata event will fire
 			if ( 'none' == video_el.preload ) { video_el.preload = 'metadata'; }
-			
-			// Change the source and make sure we don't start the video over		
-			player.src( player.availableRes[target_resolution] ).one( 'loadedmetadata', function() {
-				
-				player.currentTime( current_time );
-				
-				// If the video was paused, don't show the poster image again
-				player.addClass( 'vjs-has-started' );
-				
-				if ( ! is_paused ) { player.play(); }
-			});
+
+
+			if (player.resControlPlayer) {
+        // Change the source and make sure we don't start the video over
+        player.src(player.availableRes[target_resolution]).one('loadedmetadata', function () {
+
+          player.currentTime(current_time);
+
+          // If the video was paused, don't show the poster image again
+          player.addClass('vjs-has-started');
+
+          if (!is_paused) {
+            player.play();
+          }
+        });
+      }
 			
 			// Save the newly selected resolution in our player options property
 			player.currentRes = target_resolution;
@@ -376,8 +429,10 @@
 		
 		// Add the resolution selector button
 		resolutionSelector = new _V_.ResolutionSelector( player, {
-			buttonText		: player.localize( current_res || 'Quality' ),
-			available_res	: available_res
+			buttonText		    : player.localize( current_res || 'Quality' ),
+			available_res	    : available_res,
+      hide_menu_title   : settings.hide_menu_title,
+      res_control_player: settings.control_player
 		});
 		
 		// Add the button to the control bar object and the DOM
