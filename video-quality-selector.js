@@ -100,7 +100,6 @@
 			// Add our list of available resolutions to the player object
       player.availableRes = options.available_res;
       player.hideMenuTitle = options.hide_menu_title;
-      player.resControlPlayer = options.res_control_player;
 
 			
 			// Call the parent constructor
@@ -272,14 +271,12 @@
       return available_res
     }
 
-		function setDefaultResolution(player, default_resolutions, available_res, control_player) {
+		function setDefaultResolution(player, default_resolutions, available_res) {
       // Loop through the choosen default resolutions if there were any
       for ( var i = 0; i < default_resolutions.length; i++ ) {
         // Set the video to start out with the first available default res
         if ( available_res[default_resolutions[i]]) {
-          if (control_player) {
-            player.src( available_res[default_resolutions[i]] );
-          }
+          player.src( available_res[default_resolutions[i]] );
           player.currentRes = default_resolutions[i];
           break;
         }
@@ -325,23 +322,23 @@
 				|| ! player.availableRes[target_resolution] ) { return; }
 			
 			// Make sure the loadedmetadata event will fire
-			if ( 'none' === video_el.preload ) { video_el.preload = 'metadata'; }
+			if ( 'none' === video_el.preload ) {
+			  video_el.preload = 'metadata';
+			}
 
 
-			if (player.resControlPlayer) {
-        // Change the source and make sure we don't start the video over
-        player.src(player.availableRes[target_resolution]).one('loadedmetadata', function () {
+      // Change the source and make sure we don't start the video over
+      player.src(player.availableRes[target_resolution]).one('loadedmetadata', function () {
 
-          player.currentTime(current_time);
+        player.currentTime(current_time);
 
-          // If the video was paused, don't show the poster image again
-          player.addClass('vjs-has-started');
+        // If the video was paused, don't show the poster image again
+        player.addClass('vjs-has-started');
 
-          if (!is_paused) {
-            player.play();
-          }
-        });
-      }
+        if (!is_paused) {
+          player.play();
+        }
+      });
 			
 			// Save the newly selected resolution in our player options property
 			player.currentRes = target_resolution;
@@ -376,7 +373,6 @@
         default_res	: '',		// (string)	The resolution that should be selected by default ( '480' or  '480,1080,240' )
         force_types	: false,		// (array)	List of media types. If passed, we need to have source for each type in each resolution or that resolution will not be an option
         hide_menu_title: false,
-        control_player: true,
         available_res: {}, // (array)
       }, options || {} );
 
@@ -397,7 +393,7 @@
 
 
       var default_resolutions = ( settings.default_res && typeof settings.default_res === 'string' ) ? settings.default_res.split( ',' ) : [];
-      setDefaultResolution(this, default_resolutions, available_res, settings.control_player);
+      setDefaultResolution(this, default_resolutions, available_res);
 
       /*******************************************************************
        * Add the resolution selector button
@@ -416,7 +412,6 @@
         buttonText		    : this.localize( current_res || 'Quality' ),
         available_res	    : available_res,
         hide_menu_title   : settings.hide_menu_title,
-        res_control_player: settings.control_player
       });
 
       // Add the button to the control bar object and the DOM
