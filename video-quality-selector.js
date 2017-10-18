@@ -10,60 +10,60 @@
  * </video>
  */
 
-(function( VideoJS ) {
-	
-	/***********************************************************************************
-	 * Define some helper functions
-	 ***********************************************************************************/
-	var methods = {
-		
-		/**
-		 * In a future version, this can be made more intelligent,
-		 * but for now, we'll just add a "p" at the end if we are passed
-		 * numbers.
-		 *
-		 * @param	(string)	res	The resolution to make a label for
-		 *
-		 * @returns	(string)	The label text string
-		 */
-		res_label : function( res ) {
-			
-			return ( /^\d+$/.test( res ) ) ? res + 'p' : res;
-		}
-	};
-	
-	/***********************************************************************************
-	 * Setup our resolution menu items
-	 ***********************************************************************************/
-	VideoJS.ResolutionMenuItem = VideoJS.MenuItem.extend({
+(function(VideoJS) {
 
-		/** @constructor */
-		init : function( player, options ){
+  /***********************************************************************************
+   * Define some helper functions
+   ***********************************************************************************/
+  var methods = {
 
-		  var self = this;
-			// Modify options for parent MenuItem class's init.
-			options.label = methods.res_label( options.res );
-			options.selected = ( options.res.toString() === player.getCurrentRes().toString() );
-			
-			// Call the parent constructor
-			VideoJS.MenuItem.call( self, player, options );
-			
-			// Store the resolution as a property
-			self.resolution = options.res;
-			
-			// Register our click and tap handlers
-			self.on( ['click', 'tap'], self.onSelect );
-			
-			// Toggle the selected class whenever the resolution changes
-			player.on( 'changeRes', VideoJS.bind( self, function() {
-				if ( self.resolution === player.getCurrentRes() ) {
-					self.selected( true );
-				} else {
-					self.selected( false );
-				}
-			}));
-		}
-	});
+    /**
+     * In a future version, this can be made more intelligent,
+     * but for now, we'll just add a "p" at the end if we are passed
+     * numbers.
+     *
+     * @param	(string)	res	The resolution to make a label for
+     *
+     * @returns	(string)	The label text string
+     */
+    res_label: function(res) {
+
+      return (/^\d+$/.test(res)) ? res + 'p' : res;
+    }
+  };
+
+  /***********************************************************************************
+   * Setup our resolution menu items
+   ***********************************************************************************/
+  VideoJS.ResolutionMenuItem = VideoJS.MenuItem.extend({
+
+    /** @constructor */
+    init: function(player, options) {
+
+      var self = this;
+      // Modify options for parent MenuItem class's init.
+      options.label = methods.res_label(options.res);
+      options.selected = (options.res.toString() === player.getCurrentRes().toString());
+
+      // Call the parent constructor
+      VideoJS.MenuItem.call(self, player, options);
+
+      // Store the resolution as a property
+      self.resolution = options.res;
+
+      // Register our click and tap handlers
+      self.on(['click', 'tap'], self.onSelect);
+
+      // Toggle the selected class whenever the resolution changes
+      player.on('changeRes', VideoJS.bind(self, function() {
+        if (self.resolution === player.getCurrentRes()) {
+          self.selected(true);
+        } else {
+          self.selected(false);
+        }
+      }));
+    }
+  });
 
   VideoJS.ResolutionMenuItem.prototype.onClick = function(e) {
     e.preventDefault();
@@ -71,91 +71,92 @@
   };
 
   // Handle clicks on the menu items
-	VideoJS.ResolutionMenuItem.prototype.onSelect = function(e) {
+  VideoJS.ResolutionMenuItem.prototype.onSelect = function(e) {
     e.preventDefault();
     e.stopPropagation();
-		// Call the player.changeRes method
-		this.player().changeRes( this.resolution );
-	};
-	
-	/***********************************************************************************
-	 * Setup our resolution menu title item
-	 ***********************************************************************************/
-	VideoJS.ResolutionTitleMenuItem = VideoJS.MenuItem.extend({
-		init : function( player, options ) {
-			// Call the parent constructor
-			VideoJS.MenuItem.call( this, player, options );
-			// No click handler for the menu title
-			this.off( 'click' );
-		}
-	});
-	
-	/***********************************************************************************
-	 * Define our resolution selector button
-	 ***********************************************************************************/
-	VideoJS.ResolutionSelector = VideoJS.MenuButton.extend({
-		
-		/** @constructor */
-		init : function( player, options ) {
-			// Add our list of available resolutions to the player object
+    // Call the player.changeRes method
+    this.player().changeRes(this.resolution);
+  };
+
+  /***********************************************************************************
+   * Setup our resolution menu title item
+   ***********************************************************************************/
+  VideoJS.ResolutionTitleMenuItem = VideoJS.MenuItem.extend({
+    init: function(player, options) {
+      // Call the parent constructor
+      VideoJS.MenuItem.call(this, player, options);
+      // No click handler for the menu title
+      this.off('click');
+    }
+  });
+
+  /***********************************************************************************
+   * Define our resolution selector button
+   ***********************************************************************************/
+  VideoJS.ResolutionSelector = VideoJS.MenuButton.extend({
+
+    /** @constructor */
+    init: function(player, options) {
+      // Add our list of available resolutions to the player object
       player.availableRes = options.available_res;
       player.hideMenuTitle = options.hide_menu_title;
 
-			
-			// Call the parent constructor
-			VideoJS.MenuButton.call( this, player, options );
-			
-			// Set the button text based on the option provided
-			this.el().firstChild.firstChild.innerHTML = options.buttonText;
+      // Call the parent constructor
+      VideoJS.MenuButton.call(this, player, options);
 
-      this.on(['click', 'tap'], this.switch );
-		}
-	});
-	
-	// Set class for resolution selector button
-	VideoJS.ResolutionSelector.prototype.className = 'vjs-res-button';
-	
-	// Create a menu item for each available resolution
-	VideoJS.ResolutionSelector.prototype.createItems = function() {
-		
-		var player = this.player(),
-			items = [],
-			current_res;
+      // Set the button text based on the option provided
+      this.el().firstChild.firstChild.innerHTML = options.buttonText;
 
-		if (!player.hideMenuTitle) {
+      this.on(['click', 'tap'], this.switch);
+    }
+  });
+
+  // Set class for resolution selector button
+  VideoJS.ResolutionSelector.prototype.className = 'vjs-res-button';
+
+  // Create a menu item for each available resolution
+  VideoJS.ResolutionSelector.prototype.createItems = function() {
+
+    var player = this.player(),
+      items = [],
+      current_res;
+
+    if (!player.hideMenuTitle) {
       // Add the menu title item
-      items.push( new VideoJS.ResolutionTitleMenuItem( player, {
-        el : VideoJS.Component.prototype.createEl( 'li', {
-          className	: 'vjs-menu-title vjs-res-menu-title',
-          innerHTML	: player.localize( 'Quality' )
+      items.push(new VideoJS.ResolutionTitleMenuItem(player, {
+        el: VideoJS.Component.prototype.createEl('li', {
+          className: 'vjs-menu-title vjs-res-menu-title',
+          innerHTML: player.localize('Quality')
         })
       }));
     }
-		
-		// Add an item for each available resolution
-		for ( current_res in player.availableRes ) {
-			
-			// Don't add an item for the length attribute
-			if ( 'length' === current_res ) { continue; }
-			
-			items.push( new VideoJS.ResolutionMenuItem( player, {
-				res : current_res
-			}));
-		}
-		
-		// Sort the available resolutions in descending order
-		items.sort(function( a, b ) {
-			if ( typeof a.resolution === 'undefined' ) {
-				return -1;
-			} else {
-				return parseInt( b.resolution ) - parseInt( a.resolution );
-			}
-		});
 
-		return items;
-	};
+    // Add an item for each available resolution
+    for (current_res in player.availableRes) {
 
-	VideoJS.ResolutionSelector.prototype.onClick = function(e) {
+      // Don't add an item for the length attribute
+      if ('length' === current_res) {
+        continue;
+      }
+
+      items.push(new VideoJS.ResolutionMenuItem(player, {
+        res: current_res
+      }));
+    }
+
+    // Sort the available resolutions in descending order
+    items.sort(function(a, b) {
+      if (typeof a.resolution === 'undefined') {
+        return -1;
+      } else {
+        return parseInt(b.resolution) - parseInt(a.resolution);
+      }
+    });
+
+    return items;
+  };
+
+  VideoJS.ResolutionSelector.prototype.onClick = function(e) {
     e.preventDefault();
     e.stopPropagation();
   };
@@ -164,51 +165,51 @@
     // select the next resolution
 
     var player = this.player(),
-    currentIndex = 0,
-    i = 0,
-    orderRes = [], key;
+      currentIndex = 0,
+      i = 0,
+      orderRes = [],
+      key;
 
     e.preventDefault();
     e.stopPropagation();
 
     for (key in player.availableRes) {
-      if (key !== 'length' ) {
+      if (key !== 'length') {
         orderRes.push(key);
-        if ( key === player.currentRes) {
+        if (key === player.currentRes) {
           currentIndex = i;
         }
         i++;
       }
     }
 
-    if (currentIndex >= orderRes.length-1) {
+    if (currentIndex >= orderRes.length - 1) {
       currentIndex = 0;
     } else {
-      currentIndex ++;
+      currentIndex++;
     }
 
-    this.player().changeRes( orderRes[currentIndex] );
+    this.player().changeRes(orderRes[currentIndex]);
   };
-	
-	/***********************************************************************************
-	 * Register the plugin with videojs, main plugin function
-	 ***********************************************************************************/
-	VideoJS.plugin( 'resolutionSelector', function( options ) {
 
-		// Only enable the plugin on HTML5 videos
-		if ( !this.el().firstChild.canPlayType  ) {
-		  return;
-		}
+  /***********************************************************************************
+   * Register the plugin with videojs, main plugin function
+   ***********************************************************************************/
+  VideoJS.plugin('resolutionSelector', function(options) {
 
+    // Only enable the plugin on HTML5 videos
+    if (!this.el().firstChild.canPlayType) {
+      return;
+    }
 
-		/*******************************************************************
-		 * Setup variables, parse settings
-		 *******************************************************************/
-		var player = this,
-			resolutionSelector;
+    /*******************************************************************
+     * Setup variables, parse settings
+     *******************************************************************/
+    var player = this,
+      resolutionSelector;
 
-		function getResolutionFromSources(player, available_res) {
-		  var sources	= player.options().sources,
+    function getResolutionFromSources(player, available_res) {
+      var sources = player.options().sources,
         i = sources.length,
         current_res;
 
@@ -216,45 +217,45 @@
         return available_res;
       }
       // Get all of the available resolutions
-      while ( i > 0 ) {
+      while (i > 0) {
         i--;
         // Skip sources that don't have data-res attributes
-        if ( ! sources[i]['data-res'] ) {
+        if (!sources[i]['data-res']) {
           continue;
         }
         current_res = sources[i]['data-res'];
-        if ( typeof available_res[current_res] !== 'object' ) {
+        if (typeof available_res[current_res] !== 'object') {
           available_res[current_res] = [];
           available_res.length++;
         }
-        available_res[current_res].unshift( sources[i] );
+        available_res[current_res].unshift(sources[i]);
       }
       return available_res;
     }
 
     function checkForcedTypes(force_types, available_res) {
       var i, j, found_types, current_res;
-		  // Check for forced types
-      if ( force_types ) {
+      // Check for forced types
+      if (force_types) {
         // Loop through all available reosultions
-        for ( current_res in available_res ) {
+        for (current_res in available_res) {
           // Don't count the length property as a resolution
-          if ( 'length' === current_res ) {
+          if ('length' === current_res) {
             continue;
           }
           i = force_types.length;
           found_types = 0;
 
           // Loop through all required types
-          while ( i > 0 ) {
+          while (i > 0) {
             i--;
             j = available_res[current_res].length;
 
             // Loop through all available sources in current resolution
-            while ( j > 0 ) {
+            while (j > 0) {
               j--;
               // Check if the current source matches the current type we're checking
-              if ( force_types[i] === available_res[current_res][j].type ) {
+              if (force_types[i] === available_res[current_res][j].type) {
                 found_types++;
                 break;
               }
@@ -262,7 +263,7 @@
           }
 
           // If we didn't find sources for all of the required types in the current res, remove it
-          if ( found_types < force_types.length ) {
+          if (found_types < force_types.length) {
             delete available_res[current_res];
             available_res.length--;
           }
@@ -271,64 +272,65 @@
       return available_res
     }
 
-		function setDefaultResolution(player, default_resolutions, available_res) {
+    function setDefaultResolution(player, default_resolutions, available_res) {
       // Loop through the choosen default resolutions if there were any
-      for ( var i = 0; i < default_resolutions.length; i++ ) {
+      for (var i = 0; i < default_resolutions.length; i++) {
         // Set the video to start out with the first available default res
-        if ( available_res[default_resolutions[i]]) {
-          player.src( available_res[default_resolutions[i]] );
+        if (available_res[default_resolutions[i]]) {
+          player.src(available_res[default_resolutions[i]]);
           player.currentRes = default_resolutions[i];
           break;
         }
       }
     }
-		
-		/*******************************************************************
-		 * Add methods to player object
-		 *******************************************************************/
 
-		// Make sure we have player.localize() if it's not defined by Video.js
-		if ( typeof player.localize !== 'function' ) {
-			player.localize = function( string ) {
-				return string;
-			};
-		}
-		
-		// Helper function to get the current resolution
-		player.getCurrentRes = function() {
-			if ( typeof player.currentRes !== 'undefined' ) {
-				return player.currentRes;
-			} else {
-				try {
-					return res = player.options().sources[0]['data-res'];
-				} catch(e) {
-					return '';
-				}
-			}
-		};
-		
-		// Define the change res method
-		player.changeRes = function( target_resolution ) {
-			
-			var video_el = player.el().firstChild,
-				is_paused = player.paused(),
-				current_time = player.currentTime(),
-				button_nodes,
-				button_node_count;
-			
-			// Do nothing if we aren't changing resolutions or if the resolution isn't defined
-			if ( player.getCurrentRes() === target_resolution
-				|| ! player.availableRes
-				|| ! player.availableRes[target_resolution] ) { return; }
-			
-			// Make sure the loadedmetadata event will fire
-			if ( 'none' === video_el.preload ) {
-			  video_el.preload = 'metadata';
-			}
+    /*******************************************************************
+     * Add methods to player object
+     *******************************************************************/
 
+    // Make sure we have player.localize() if it's not defined by Video.js
+    if (typeof player.localize !== 'function') {
+      player.localize = function(string) {
+        return string;
+      };
+    }
+
+    // Helper function to get the current resolution
+    player.getCurrentRes = function() {
+      if (typeof player.currentRes !== 'undefined') {
+        return player.currentRes;
+      } else {
+        try {
+          return res = player.options().sources[0]['data-res'];
+        } catch (e) {
+          return '';
+        }
+      }
+    };
+
+    // Define the change res method
+    player.changeRes = function(target_resolution) {
+
+      var video_el = player.el().firstChild,
+        is_paused = player.paused(),
+        current_time = player.currentTime(),
+        button_nodes,
+        button_node_count;
+
+      // Do nothing if we aren't changing resolutions or if the resolution isn't defined
+      if (player.getCurrentRes() === target_resolution ||
+        !player.availableRes ||
+        !player.availableRes[target_resolution]) {
+        return;
+      }
+
+      // Make sure the loadedmetadata event will fire
+      if ('none' === video_el.preload) {
+        video_el.preload = 'metadata';
+      }
 
       // Change the source and make sure we don't start the video over
-      player.src(player.availableRes[target_resolution]).one('loadedmetadata', function () {
+      player.src(player.availableRes[target_resolution]).one('loadedmetadata', function() {
 
         player.currentTime(current_time);
 
@@ -339,42 +341,42 @@
           player.play();
         }
       });
-			
-			// Save the newly selected resolution in our player options property
-			player.currentRes = target_resolution;
-			
-			// Make sure the button has been added to the control bar
-			if ( player.controlBar.resolutionSelector ) {
-				
-				button_nodes = player.controlBar.resolutionSelector.el().firstChild.children;
-				button_node_count = button_nodes.length;
-				
-				// Update the button text
-				while ( button_node_count > 0 ) {
-					
-					button_node_count--;
-					
-					if ( 'vjs-control-text' === button_nodes[button_node_count].className ) {
-						
-						button_nodes[button_node_count].innerHTML = methods.res_label( target_resolution );
-						break;
-					}
-				}
-			}
-			
-			// Update the classes to reflect the currently selected resolution
-			player.trigger( 'changeRes' );
-		};
+
+      // Save the newly selected resolution in our player options property
+      player.currentRes = target_resolution;
+
+      // Make sure the button has been added to the control bar
+      if (player.controlBar.resolutionSelector) {
+
+        button_nodes = player.controlBar.resolutionSelector.el().firstChild.children;
+        button_node_count = button_nodes.length;
+
+        // Update the button text
+        while (button_node_count > 0) {
+
+          button_node_count--;
+
+          if ('vjs-control-text' === button_nodes[button_node_count].className) {
+
+            button_nodes[button_node_count].innerHTML = methods.res_label(target_resolution);
+            break;
+          }
+        }
+      }
+
+      // Update the classes to reflect the currently selected resolution
+      player.trigger('changeRes');
+    };
 
     // Define the change res method
-    player.setResOptions = function( options ) {
+    player.setResOptions = function(options) {
       // Override default options with those provided
       var settings = VideoJS.util.mergeOptions({
-        default_res	: '',		// (string)	The resolution that should be selected by default ( '480' or  '480,1080,240' )
-        force_types	: false,		// (array)	List of media types. If passed, we need to have source for each type in each resolution or that resolution will not be an option
+        default_res: '', // (string)	The resolution that should be selected by default ( '480' or  '480,1080,240' )
+        force_types: false, // (array)	List of media types. If passed, we need to have source for each type in each resolution or that resolution will not be an option
         hide_menu_title: false,
         available_res: {}, // (array)
-      }, options || {} );
+      }, options || {});
 
       var available_res = getResolutionFromSources(this, settings.available_res);
       available_res = checkForcedTypes(settings.force_types, available_res);
@@ -387,39 +389,38 @@
       }
 
       // Make sure we have at least 2 available resolutions before we add the button
-      if ( available_res.length < 2 ) {
+      if (available_res.length < 2) {
         return;
       }
 
-
-      var default_resolutions = ( settings.default_res && typeof settings.default_res === 'string' ) ? settings.default_res.split( ',' ) : [];
+      var default_resolutions = (settings.default_res && typeof settings.default_res === 'string') ? settings.default_res.split(',') : [];
       setDefaultResolution(this, default_resolutions, available_res);
 
       /*******************************************************************
        * Add the resolution selector button
        *******************************************************************/
 
-        // Get the starting resolution
+      // Get the starting resolution
       var current_res = this.getCurrentRes();
 
-      if ( current_res ) {
-        current_res = methods.res_label( current_res );
+      if (current_res) {
+        current_res = methods.res_label(current_res);
       }
 
-      this.controlBar.removeChild( resolutionSelector );
+      this.controlBar.removeChild(resolutionSelector);
       // Add the resolution selector button
-      resolutionSelector = new VideoJS.ResolutionSelector( this, {
-        buttonText		    : this.localize( current_res || 'Quality' ),
-        available_res	    : available_res,
-        hide_menu_title   : settings.hide_menu_title,
+      resolutionSelector = new VideoJS.ResolutionSelector(this, {
+        buttonText: this.localize(current_res || 'Quality'),
+        available_res: available_res,
+        hide_menu_title: settings.hide_menu_title,
       });
 
       // Add the button to the control bar object and the DOM
-      this.controlBar.resolutionSelector = this.controlBar.addChild( resolutionSelector );
+      this.controlBar.resolutionSelector = this.controlBar.addChild(resolutionSelector);
     };
 
     player.setResOptions(options);
 
-	});
+  });
 
-})( videojs );
+})(videojs);
