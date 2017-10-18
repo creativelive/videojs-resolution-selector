@@ -29,7 +29,6 @@
   },
   "scripts": {
     "test": "gulp beautify && gulp eslint",
-    "install": ".ci/setup",
     "beautify": "gulp beautify --write"
   }
 }
