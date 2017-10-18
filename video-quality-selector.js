@@ -311,7 +311,7 @@
     // Define the change res method
     player.changeRes = function(targetResolution) {
 
-      var videoElement= player.el().firstChild,
+      var videoElement = player.el().firstChild,
         isPaused = player.paused(),
         currentTime = player.currentTime(),
         buttonNodes,
