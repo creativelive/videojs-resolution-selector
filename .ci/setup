@@ -1,0 +1,20 @@
+#!/bin/bash
+
+TXTDEF='\033[0m'          # everything back to defaults
+BAKBLU='\033[37;1;44m'    # blue background
+BAKRED='\033[37;1;41m'    # red background
+BAKGRN='\033[37;1;42m'    # green background
+BLDWHT='\033[0;37;1m'     # bold white text
+
+echo -e "${BLDWHT}${BAKBLU}  BUILD SETUP  ${TXTDEF}"
+
+if [ -d .git ]; then
+  printf "%s\r" "- adding git hooks..."
+  rm .git/hooks/pre-commit 2>/dev/null
+  rm .git/hooks/pre-push 2>/dev/null
+  ln -s ../../.ci/git/hooks/pre-push .git/hooks/pre-push
+  printf "%s\n" '- adding git hooks... done'
+fi
+
+echo -e "${BLDWHT}${BAKBLU}  BUILD SETUP COMPLETE  ${TXTDEF}"
+echo ''
