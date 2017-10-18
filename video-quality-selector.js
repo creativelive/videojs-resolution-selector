@@ -26,7 +26,7 @@
      *
      * @returns	(string)	The label text string
      */
-    res_label: function(res) {
+    resolutionLabel: function(res) {
 
       return (/^\d+$/.test(res)) ? res + 'p' : res;
     }
@@ -42,7 +42,7 @@
 
       var self = this;
       // Modify options for parent MenuItem class's init.
-      options.label = methods.res_label(options.res);
+      options.label = methods.resolutionLabel(options.res);
       options.selected = (options.res.toString() === player.getCurrentRes().toString());
 
       // Call the parent constructor
@@ -98,8 +98,8 @@
     /** @constructor */
     init: function(player, options) {
       // Add our list of available resolutions to the player object
-      player.availableRes = options.available_res;
-      player.hideMenuTitle = options.hide_menu_title;
+      player.availableRes = options.availableRes;
+      player.hideMenuTitle = options.hideMenuTitle;
 
       // Call the parent constructor
       VideoJS.MenuButton.call(this, player, options);
@@ -119,7 +119,7 @@
 
     var player = this.player(),
       items = [],
-      current_res;
+      currentRes;
 
     if (!player.hideMenuTitle) {
       // Add the menu title item
@@ -132,15 +132,15 @@
     }
 
     // Add an item for each available resolution
-    for (current_res in player.availableRes) {
+    for (currentRes in player.availableRes) {
 
       // Don't add an item for the length attribute
-      if ('length' === current_res) {
+      if ('length' === currentRes) {
         continue;
       }
 
       items.push(new VideoJS.ResolutionMenuItem(player, {
-        res: current_res
+        res: currentRes
       }));
     }
 
@@ -208,13 +208,13 @@
     var player = this,
       resolutionSelector;
 
-    function getResolutionFromSources(player, available_res) {
+    function getResolutionFromSources(player, availableRes) {
       var sources = player.options().sources,
         i = sources.length,
-        current_res;
+        currentRes;
 
-      if (available_res.length) {
-        return available_res;
+      if (availableRes.length) {
+        return availableRes;
       }
       // Get all of the available resolutions
       while (i > 0) {
@@ -223,62 +223,62 @@
         if (!sources[i]['data-res']) {
           continue;
         }
-        current_res = sources[i]['data-res'];
-        if (typeof available_res[current_res] !== 'object') {
-          available_res[current_res] = [];
-          available_res.length++;
+        currentRes = sources[i]['data-res'];
+        if (typeof availableRes[currentRes] !== 'object') {
+          availableRes[currentRes] = [];
+          availableRes.length++;
         }
-        available_res[current_res].unshift(sources[i]);
+        availableRes[currentRes].unshift(sources[i]);
       }
-      return available_res;
+      return availableRes;
     }
 
-    function checkForcedTypes(force_types, available_res) {
-      var i, j, found_types, current_res;
+    function checkForcedTypes(forceTypes, availableRes) {
+      var i, j, foundTypes, currentRes;
       // Check for forced types
-      if (force_types) {
+      if (forceTypes) {
         // Loop through all available reosultions
-        for (current_res in available_res) {
+        for (currentRes in availableRes) {
           // Don't count the length property as a resolution
-          if ('length' === current_res) {
+          if ('length' === currentRes) {
             continue;
           }
-          i = force_types.length;
-          found_types = 0;
+          i = forceTypes.length;
+          foundTypes = 0;
 
           // Loop through all required types
           while (i > 0) {
             i--;
-            j = available_res[current_res].length;
+            j = availableRes[currentRes].length;
 
             // Loop through all available sources in current resolution
             while (j > 0) {
               j--;
               // Check if the current source matches the current type we're checking
-              if (force_types[i] === available_res[current_res][j].type) {
-                found_types++;
+              if (forceTypes[i] === availableRes[currentRes][j].type) {
+                foundTypes++;
                 break;
               }
             }
           }
 
           // If we didn't find sources for all of the required types in the current res, remove it
-          if (found_types < force_types.length) {
-            delete available_res[current_res];
-            available_res.length--;
+          if (foundTypes < forceTypes.length) {
+            delete availableRes[currentRes];
+            availableRes.length--;
           }
         }
       }
-      return available_res
+      return availableRes
     }
 
-    function setDefaultResolution(player, default_resolutions, available_res) {
+    function setDefaultResolution(player, defaultResolutions, availableRes) {
       // Loop through the choosen default resolutions if there were any
-      for (var i = 0; i < default_resolutions.length; i++) {
+      for (var i = 0; i < defaultResolutions.length; i++) {
         // Set the video to start out with the first available default res
-        if (available_res[default_resolutions[i]]) {
-          player.src(available_res[default_resolutions[i]]);
-          player.currentRes = default_resolutions[i];
+        if (availableRes[defaultResolutions[i]]) {
+          player.src(availableRes[defaultResolutions[i]]);
+          player.currentRes = defaultResolutions[i];
           break;
         }
       }
@@ -309,56 +309,56 @@
     };
 
     // Define the change res method
-    player.changeRes = function(target_resolution) {
+    player.changeRes = function(targetResolution) {
 
-      var video_el = player.el().firstChild,
-        is_paused = player.paused(),
-        current_time = player.currentTime(),
-        button_nodes,
-        button_node_count;
+      var videoElement= player.el().firstChild,
+        isPaused = player.paused(),
+        currentTime = player.currentTime(),
+        buttonNodes,
+        buttonNodeCount;
 
       // Do nothing if we aren't changing resolutions or if the resolution isn't defined
-      if (player.getCurrentRes() === target_resolution ||
+      if (player.getCurrentRes() === targetResolution ||
         !player.availableRes ||
-        !player.availableRes[target_resolution]) {
+        !player.availableRes[targetResolution]) {
         return;
       }
 
       // Make sure the loadedmetadata event will fire
-      if ('none' === video_el.preload) {
-        video_el.preload = 'metadata';
+      if ('none' === videoElement.preload) {
+        videoElement.preload = 'metadata';
       }
 
       // Change the source and make sure we don't start the video over
-      player.src(player.availableRes[target_resolution]).one('loadedmetadata', function() {
+      player.src(player.availableRes[targetResolution]).one('loadedmetadata', function() {
 
-        player.currentTime(current_time);
+        player.currentTime(currentTime);
 
         // If the video was paused, don't show the poster image again
         player.addClass('vjs-has-started');
 
-        if (!is_paused) {
+        if (!isPaused) {
           player.play();
         }
       });
 
       // Save the newly selected resolution in our player options property
-      player.currentRes = target_resolution;
+      player.currentRes = targetResolution;
 
       // Make sure the button has been added to the control bar
       if (player.controlBar.resolutionSelector) {
 
-        button_nodes = player.controlBar.resolutionSelector.el().firstChild.children;
-        button_node_count = button_nodes.length;
+        buttonNodes = player.controlBar.resolutionSelector.el().firstChild.children;
+        buttonNodeCount = buttonNodes.length;
 
         // Update the button text
-        while (button_node_count > 0) {
+        while (buttonNodeCount > 0) {
 
-          button_node_count--;
+          buttonNodeCount--;
 
-          if ('vjs-control-text' === button_nodes[button_node_count].className) {
+          if ('vjs-control-text' === buttonNodes[buttonNodeCount].className) {
 
-            button_nodes[button_node_count].innerHTML = methods.res_label(target_resolution);
+            buttonNodes[buttonNodeCount].innerHTML = methods.resolutionLabel(targetResolution);
             break;
           }
         }
@@ -378,41 +378,41 @@
         available_res: {}, // (array)
       }, options || {});
 
-      var available_res = getResolutionFromSources(this, settings.available_res);
-      available_res = checkForcedTypes(settings.force_types, available_res);
+      var availableRes = getResolutionFromSources(this, settings.available_res);
+      availableRes = checkForcedTypes(settings.force_types, availableRes);
 
-      available_res.length = 0;
-      for (var key in available_res) {
-        if (available_res.hasOwnProperty(key) && key !== 'length') {
-          available_res.length++;
+      availableRes.length = 0;
+      for (var key in availableRes) {
+        if (availableRes.hasOwnProperty(key) && key !== 'length') {
+          availableRes.length++;
         }
       }
 
       // Make sure we have at least 2 available resolutions before we add the button
-      if (available_res.length < 2) {
+      if (availableRes.length < 2) {
         return;
       }
 
-      var default_resolutions = (settings.default_res && typeof settings.default_res === 'string') ? settings.default_res.split(',') : [];
-      setDefaultResolution(this, default_resolutions, available_res);
+      var defaultResolutions = (settings.default_res && typeof settings.default_res === 'string') ? settings.default_res.split(',') : [];
+      setDefaultResolution(this, defaultResolutions, availableRes);
 
       /*******************************************************************
        * Add the resolution selector button
        *******************************************************************/
 
       // Get the starting resolution
-      var current_res = this.getCurrentRes();
+      var currentRes = this.getCurrentRes();
 
-      if (current_res) {
-        current_res = methods.res_label(current_res);
+      if (currentRes) {
+        currentRes = methods.resolutionLabel(currentRes);
       }
 
       this.controlBar.removeChild(resolutionSelector);
       // Add the resolution selector button
       resolutionSelector = new VideoJS.ResolutionSelector(this, {
-        buttonText: this.localize(current_res || 'Quality'),
-        available_res: available_res,
-        hide_menu_title: settings.hide_menu_title,
+        buttonText: this.localize(currentRes || 'Quality'),
+        availableRes: availableRes,
+        hideMenuTitle: settings.hide_menu_title,
       });
 
       // Add the button to the control bar object and the DOM
