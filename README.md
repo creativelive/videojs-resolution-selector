@@ -39,6 +39,31 @@ videojs( '#my-video', { plugins : { resolutionSelector : {} } }, function() {
 ```
 The plugin provides a `changeRes` method on the `player` object. You can call it like so (after your player is ready): `player.changeRes( '480' )`.
 
+### Init plugin and add sources later
+
+The plugin can be initialized empty and add sources later in javascript using the following example
+```javascript
+videojs( '#my-video', { plugins : { resolutionSelector : {} } }, function() {
+
+	var player = this;
+
+  player.setResOptions({
+    default_res: 'HD',
+    available_res: {
+      HD: '<url of the media file>',
+      SD: '<url of the media file>'
+    }
+  });
+});
+```
+
+ **Available Options**
+ * `default_res`: (String) Should match one the your resolution key
+ * `avaiable_res`: (Object) List of all available resolution
+ * `hide_menu_title`: (Boolean default false) hide the first menuItem displaying "quality"
+ * `force_types`	: (array)	List of media types. If passed, we need to have source for each type in each resolution or that resolution will not be an option
+
+
 ## Simple Example
 ```html
 <!DOCTYPE html>

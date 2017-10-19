@@ -1,0 +1,41 @@
+{
+  "rules": {
+    "quotes": [2, "single"],
+    "no-unused-vars": [2, {"vars": "all", "args": "none"}],
+    "consistent-this": [2, "self"],
+    "no-use-before-define": [2, "nofunc"],
+    "consistent-return": 0,
+    "camelcase": 0,
+    "no-underscore-dangle": 0,
+    "new-cap": 0,
+    "no-new": 0,
+    "global-strict": 0,
+    "strict": [2, "global"]
+  },
+  "globals": {
+    "$": true,
+    "_": true,
+    "after": true,
+    "analytics": true,
+    "AWS": true,
+    "angular": true,
+    "Backbone": true,
+    "before": true,
+    "braintree": true,
+    "define": true,
+    "describe": true,
+    "dust": true,
+    "it": true,
+    "mixpanel": true,
+    "moment": true,
+    "MP": true,
+    "require": true,
+    "rind": true,
+    "Vault": true,
+    "vent": true
+  },
+  "env":{
+    "browser": true,
+    "node": true
+  }
+}

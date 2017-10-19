@@ -1,0 +1,23 @@
+npm-debug.log
+
+# artifacts
+/artifacts
+.DS_Store
+.svn
+*~
+*.swp
+*.rbc
+
+# sublime config
+*.sublime-project
+*.sublime-workspace
+
+# webstorm
+.idea
+
+npm-debug.log
+newrelic_agent.log
+
+/node_modules
+/.ci/node_modules
+.vscode
