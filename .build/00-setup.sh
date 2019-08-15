@@ -48,9 +48,16 @@ full_package_name() {
   fi
 }
 
+parse_scope() {
+  local package="$1"
+
+  echo "$1" | sed -E "s/^(@(.+)\/)?(.+)$/\2/g"
+}
+
 package_scope() {
   if [[ -f package.json ]]; then
-    echo $(cat package.json | jq -r .name | sed -E "s/^(@(.+)\/)?(.+)$/\2/g")
+    local name=$(cat package.json | jq -r .name)
+    parse_scope "${name}" 
   else
     echo ""
   fi
