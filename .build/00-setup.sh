@@ -41,6 +41,8 @@ apply_git_creds() {
 full_package_name() {
   if [[ -f package.json ]]; then
     echo $(cat package.json | jq -r .name)
+  elif [[ -f .name ]]; then
+    cat .name
   else
     echo $(basename `pwd`)
   fi
@@ -66,6 +68,8 @@ branch_scope() {
 package_name() {
   if [[ -f package.json ]]; then
     echo $(cat package.json | jq -r .name | sed -E "s/^(@.+\/)?(.+)$/\2/g")
+  elif [[ -f .name ]]; then
+    cat .name
   else
     echo $(basename `pwd`)
   fi
@@ -79,10 +83,10 @@ package_version() {
       version=$(cat .version)
     fi
   fi
-  if [[ -z "${version}" ]]; then
-    echo "0.1.0"
-  else
+  if `echo "${version}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+.*$'`; then
     echo "${version}"
+  else
+    echo "0.1.0"
   fi
 }
 
@@ -134,7 +138,7 @@ bump_version_generic() {
   if [[ "${branch}" == "release" ]]; then
     updated=$(echo ${version}|perl -pe 's/^(\d+)\.(\d+)\.(\d+)(.*)$/$1.".".$2.".".($3+1)/e')
   else
-    updated=$(echo ${version}|perl -pe 's/^(\d+)\.(\d+)\.(\d+)(.*)$/$1.".".$2.".".$3)/e')
+    updated=$(echo ${version}|perl -pe 's/^(\d+)\.(\d+)\.(\d+)(.*)$/$1.".".$2.".".$3/e')
     if [[ -z "${BUILD_NUMBER}" ]]; then
       BUILD_NUMBER="t$(date +%s)"
     fi
@@ -206,8 +210,17 @@ docker_artifact() {
   echo "${DOCKER_REGISTRY}/$(package_name):$(package_version)"
 }
 
+sanitize() {
+  echo "${1}" | tr -sC '[:alnum:]' '-' | tr '[:upper:]' '[:lower:]' | sed -E 's/^[-]*(.*[^-])[-]*$/\1/g'
+}
+
 docker_latest() {
-  echo "${DOCKER_REGISTRY}/$(package_name):latest"
+  branch="$(branch_name)"
+  tag="latest"
+  if [[ "${branch}" != "release" ]]; then
+      tag=$(sanitize "${branch}-latest")
+  fi
+  echo "${DOCKER_REGISTRY}/$(package_name):${tag}"
 }
 
 COMMIT_FILENAME=".commit.tmp"
