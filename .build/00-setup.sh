@@ -41,18 +41,31 @@ apply_git_creds() {
 full_package_name() {
   if [[ -f package.json ]]; then
     echo $(cat package.json | jq -r .name)
-  elif [[ -f .name ]]; then
-    cat .name
   else
     echo $(basename `pwd`)
+  fi
+}
+
+package_scope() {
+  if [[ -f package.json ]]; then
+    echo $(cat package.json | jq -r .name | sed -E "s/^(@(.+)\/)?(.+)$/\2/g")
+  else
+    echo ""
+  fi
+}
+
+branch_scope() {
+  branch=$(branch_name)
+  if [[ "${branch}" == "release" ]]; then
+    echo "creativelive"
+  else
+    echo "creativelive-dev"
   fi
 }
 
 package_name() {
   if [[ -f package.json ]]; then
     echo $(cat package.json | jq -r .name | sed -E "s/^(@.+\/)?(.+)$/\2/g")
-  elif [[ -f .name ]]; then
-    cat .name
   else
     echo $(basename `pwd`)
   fi
@@ -66,10 +79,10 @@ package_version() {
       version=$(cat .version)
     fi
   fi
-  if `echo "${version}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+.*$'`; then
-    echo "${version}"
-  else
+  if [[ -z "${version}" ]]; then
     echo "0.1.0"
+  else
+    echo "${version}"
   fi
 }
 
@@ -121,7 +134,7 @@ bump_version_generic() {
   if [[ "${branch}" == "release" ]]; then
     updated=$(echo ${version}|perl -pe 's/^(\d+)\.(\d+)\.(\d+)(.*)$/$1.".".$2.".".($3+1)/e')
   else
-    updated=$(echo ${version}|perl -pe 's/^(\d+)\.(\d+)\.(\d+)(.*)$/$1.".".$2.".".$3/e')
+    updated=$(echo ${version}|perl -pe 's/^(\d+)\.(\d+)\.(\d+)(.*)$/$1.".".$2.".".$3)/e')
     if [[ -z "${BUILD_NUMBER}" ]]; then
       BUILD_NUMBER="t$(date +%s)"
     fi
@@ -151,11 +164,27 @@ bump_version_npm() {
 }
 
 bump_version() {
-  rm -f "${COMMIT_FILENAME}"
   if [[ -f package.json ]]; then
     bump_version_npm
   else
     bump_version_generic
+  fi
+}
+
+update_scope_npm() {
+
+  if [[ "$(package_scope)" != "$(branch_scope)" ]]; then
+    local new_name="@$(branch_scope)/$(package_name)"
+    cat package.json | jq ".name = \"${new_name}\"" > package.json.tmp
+    mv -f package.json.tmp package.json
+    echo package.json >> "${COMMIT_FILENAME}"
+  fi
+}
+
+update_scope() {
+# warning - bump_version removes commit filename
+  if [[ -f package.json ]]; then
+    update_scope_npm
   fi
 }
 

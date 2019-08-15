@@ -2,9 +2,21 @@
 
 if [[ -z "${PACKAGE_NAME}" ]]; then source ".build/00-setup.sh"; fi
 
+rm -f "${COMMIT_FILENAME}"
+
 name="$(package_name)"
 version="$(package_version)"
 bump="false"
+
+echo "*** Checking package scope..."
+
+current_scope="$(package_scope)"
+
+update_scope
+
+if [[ "$(package_scope)" != "${current_scope}" ]]; then
+  echo "updated package scope to @$(package_scope)/$(package_name)"
+fi
 
 echo "*** Checking package version..."
 
