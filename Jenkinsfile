@@ -1,4 +1,4 @@
-node("code") {
+node {
  try {
     stage('Clone Repository') {
         /* Let's make sure we have the repository cloned to our workspace */
