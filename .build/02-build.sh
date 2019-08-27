@@ -5,7 +5,7 @@ if [[ -z "${PACKAGE_NAME}" ]]; then source ".build/00-setup.sh"; fi
 echo "*** Build..."
 
 if [[ -f package.json ]]; then
-  npm install
+  npm ci
 
   if [ $? -ne 0 ]; then
     echo "build failed!"

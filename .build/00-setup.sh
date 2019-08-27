@@ -230,5 +230,14 @@ docker_latest() {
   echo "${DOCKER_REGISTRY}/$(package_name):${tag}"
 }
 
+docker_base_tag() {
+  if [[ "$(branch_name)" == "release" ]]; then
+    echo "latest"
+  else
+    echo "master-latest"
+  fi
+}
+
+
 COMMIT_FILENAME=".commit.tmp"
 

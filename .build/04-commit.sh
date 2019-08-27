@@ -4,7 +4,7 @@ if [[ -z "${PACKAGE_NAME}" ]]; then source ".build/00-setup.sh"; fi
 
 if [[ ! -f "${COMMIT_FILENAME}" ]]; then
   echo "*** Nothing to commit!"
-  return
+  exit 0
 fi
 
 

@@ -8,6 +8,8 @@ name="$(package_name)"
 version="$(package_version)"
 bump="false"
 
+
+
 echo "*** Checking package scope..."
 
 current_scope="$(package_scope)"
@@ -21,6 +23,7 @@ fi
 echo "*** Checking package version..."
 
 if [[ -f package.json ]]; then
+
   if [[ "${bump}" == "false" && ! -z "$(prerelease_tag)" && "$(package_prerelease_tag)" != "$(prerelease_tag)" ]]; then
     echo "package version ${version} needs to be updated with prerelease tag of $(prerelease_tag)"
     bump="true"
