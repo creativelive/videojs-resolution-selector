@@ -2,13 +2,12 @@
 
 if [[ -z "${PACKAGE_NAME}" ]]; then source ".build/00-setup.sh"; fi
 
+
 rm -f "${COMMIT_FILENAME}"
 
 name="$(package_name)"
 version="$(package_version)"
 bump="false"
-
-
 
 echo "*** Checking package scope..."
 
@@ -65,19 +64,3 @@ if [[ ! -z "${updated}" ]] && [[ "${updated}" != "${version}" ]]; then
   echo "..updated from ${version} to ${updated}"
 fi
 
-echo "*** Checking package dependencies..."
-
-for dep in `cat package.json | jq -ar '.dependencies|keys|.[]'`; do
-  dep_scope=$(parse_scope "${dep}")
-
-  if [[ "$(branch_name)" == "release" ]]; then
-    if [[ "${dep_scope}" == "creativelive-dev" ]]; then
-      echo "FATAL: release build is not allowed to depend on dev artifacts ($dep)!"
-      exit 1
-    fi
-  else
-    if [[ "${dep_scope}" == "creativelive" ]]; then
-      echo "WARN: dev build is depending on release version of $dep"
-    fi
-  fi
-done

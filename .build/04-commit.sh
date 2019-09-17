@@ -10,8 +10,6 @@ fi
 
 if [[ "$(branch_name)" != "SNAPSHOT" ]]; then
   echo "*** Committing updates to Github..."
-env
-  echo "*****"
 
   git_config_user=$(git config user.name)
   if [[ -z "${git_config_user}" ]]; then

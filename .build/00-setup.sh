@@ -1,5 +1,26 @@
 #!/usr/bin/env bash
 
+if [ -z "${DOCKER_DEV_REGISTRY}" ]; then
+  export DOCKER_DEV_REGISTRY="docker.dev.crlv.io"
+  echo "warning, DOCKER_DEV_REGISTRY was not provided, assuming ${DOCKER_DEV_REGISTRY}"
+fi
+
+if [ -z "${DOCKER_PROD_REGISTRY}" ]; then
+  export DOCKER_PROD_REGISTRY="docker.prod.crlv.io"
+  echo "warning, DOCKER_PROD_REGISTRY was not provided, assuming ${DOCKER_PROD_REGISTRY}"
+fi
+
+if [ -z "${NPM_DEV_REGISTRY}" ]; then
+  export NPM_DEV_REGISTRY="https://npm.dev.crlv.io"
+  echo "warning, NPM_DEV_REGISTRY was not provided, assuming ${NPM_DEV_REGISTRY}"
+fi
+
+if [ -z "${NPM_PROD_REGISTRY}" ]; then
+  export NPM_PROD_REGISTRY="https://npm.prod.crlv.io"
+  echo "warning, NPM_PROD_REGISTRY was not provided, assuming ${NPM_PROD_REGISTRY}"
+fi
+
+
 urlencode() {
     # urlencode <string>
     old_lc_collate=$LC_COLLATE
@@ -65,11 +86,11 @@ package_scope() {
 
 branch_scope() {
   branch=$(branch_name)
-  if [[ "${branch}" == "release" ]]; then
+#  if [[ "${branch}" == "release" ]]; then
     echo "creativelive"
-  else
-    echo "creativelive-dev"
-  fi
+#  else
+#    echo "creativelive-dev"
+#  fi
 }
 
 package_name() {
@@ -130,7 +151,7 @@ package_prerelease_build() {
 is_version_published_npm() {
   version="$1"
 
-  if npm view --silent --json "$(full_package_name)" | jq -r ".versions[]?" | grep -qx "${version}" ; then
+  if npm view --registry="$(npm_registry)" --silent --json "$(full_package_name)" | jq -r ".versions[]?" | grep -qx "${version}" ; then
     echo "true"
     return 0
   else
@@ -199,22 +220,9 @@ update_scope() {
   fi
 }
 
-if [ -z "${BASTION_CLUSTER}" ]; then
-  export BASTION_CLUSTER="dev"
-fi
-
-if [ -z "${DOCKER_REGISTRY}" ]; then
-  export DOCKER_REGISTRY="docker.${BASTION_CLUSTER}.crlv.io"
-  echo "warning, DOCKER_REGISTRY was not provided, assuming ${DOCKER_REGISTRY}"
-fi
-
-if [ -z "${NPM_REGISTRY}" ]; then
-  export NPM_REGISTRY="npm.${BASTION_CLUSTER}.crlv.io"
-  echo "warning, NPM_REGISTRY was not provided, assuming ${NPM_REGISTRY}"
-fi
 
 docker_artifact() {
-  echo "${DOCKER_REGISTRY}/$(package_name):$(package_version)"
+  echo "$(package_name):$(package_version)"
 }
 
 sanitize() {
@@ -227,8 +235,28 @@ docker_latest() {
   if [[ "${branch}" != "release" ]]; then
       tag=$(sanitize "${branch}-latest")
   fi
-  echo "${DOCKER_REGISTRY}/$(package_name):${tag}"
+  echo "$(package_name):${tag}"
 }
+
+docker_registry() {
+  branch="$(branch_name)"
+  if [[ "${branch}" == "release" ]]; then
+    echo "${DOCKER_PROD_REGISTRY}"
+  else
+    echo "${DOCKER_DEV_REGISTRY}"
+  fi
+}
+
+npm_registry() {
+  branch="$(branch_name)"
+  if [[ "${branch}" == "release" ]]; then
+    echo "${NPM_PROD_REGISTRY}"
+  else
+    echo "${NPM_DEV_REGISTRY}"
+  fi
+}
+
+ 
 
 docker_base_tag() {
   if [[ "$(branch_name)" == "release" ]]; then
