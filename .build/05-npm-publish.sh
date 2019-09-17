@@ -7,9 +7,10 @@ if [[ -f package.json ]]; then
 
   if [[ $(jq -r .name < package.json) =~ "@creativelive" ]]; then
     if [[ "$(branch_name)" == "release" ]]; then
-      npm publish
+      npm publish --production --registry=${NPM_PROD_REGISTRY}
+      npm publish --production --registry=${NPM_DEV_REGISTRY}  # back-publish prod artifacts to dev
     else
-      npm publish --tag "$(prerelease_tag)" # I think this is ignored: --registry ${NPM_REGISTRY}
+      npm publish --tag "$(prerelease_tag)" --registry=${NPM_DEV_REGISTRY}
     fi
   else
     echo "${pkg} package.json name does not have @creativelive"
