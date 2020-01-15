@@ -1,7 +1,7 @@
 {
   "name": "@creativelive/videojs-resolution-selector",
   "description": "Adds a resolution selector button to Video.js to allow users to manually adjust the video quality.",
-  "version": "2.0.2-master.6",
+  "version": "2.0.2-master.7",
   "author": "Dominic P",
   "license": "MIT",
   "main": "video-quality-selector.js",
