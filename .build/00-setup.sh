@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 
 if [ -z "${DOCKER_DEV_REGISTRY}" ]; then
-  export DOCKER_DEV_REGISTRY="docker.dev.crlv.io"
+  export DOCKER_DEV_REGISTRY="docker.dev.creativelive.com"
   echo "warning, DOCKER_DEV_REGISTRY was not provided, assuming ${DOCKER_DEV_REGISTRY}"
 fi
 
 if [ -z "${DOCKER_PROD_REGISTRY}" ]; then
-  export DOCKER_PROD_REGISTRY="docker.prod.crlv.io"
+  export DOCKER_PROD_REGISTRY="docker.prod.creativelive.com"
   echo "warning, DOCKER_PROD_REGISTRY was not provided, assuming ${DOCKER_PROD_REGISTRY}"
 fi
 
 if [ -z "${NPM_DEV_REGISTRY}" ]; then
-  export NPM_DEV_REGISTRY="https://npm.dev.crlv.io"
+  export NPM_DEV_REGISTRY="https://npm.dev.creativelive.com"
   echo "warning, NPM_DEV_REGISTRY was not provided, assuming ${NPM_DEV_REGISTRY}"
 fi
 
 if [ -z "${NPM_PROD_REGISTRY}" ]; then
-  export NPM_PROD_REGISTRY="https://npm.prod.crlv.io"
+  export NPM_PROD_REGISTRY="https://npm.prod.creativelive.com"
   echo "warning, NPM_PROD_REGISTRY was not provided, assuming ${NPM_PROD_REGISTRY}"
 fi
 
@@ -229,13 +229,17 @@ sanitize() {
   echo "${1}" | tr -sC '[:alnum:]' '-' | tr '[:upper:]' '[:lower:]' | sed -E 's/^[-]*(.*[^-])[-]*$/\1/g'
 }
 
-docker_latest() {
+docker_latest_tag() {
   branch="$(branch_name)"
   tag="latest"
   if [[ "${branch}" != "release" ]]; then
       tag=$(sanitize "${branch}-latest")
   fi
-  echo "$(package_name):${tag}"
+  echo "${tag}"
+}
+
+docker_latest() {
+  echo "$(package_name):$(docker_latest_tag)"
 }
 
 docker_registry() {
