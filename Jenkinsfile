@@ -1,4 +1,4 @@
-node {
+node("build") {
   try {
     withCredentials([
         usernamePassword(credentialsId: 'builder', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASSWORD'),
